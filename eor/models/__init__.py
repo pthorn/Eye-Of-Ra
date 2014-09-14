@@ -4,7 +4,7 @@ import logging
 log = logging.getLogger(__name__)
 
 from .sqlalchemy_base import Session, Base, BaseMixin
-from .eor import CMSMessage, Page
+from .cms import CMSMessage, Page
 from .user import Role, User
 
 

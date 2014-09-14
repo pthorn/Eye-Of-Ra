@@ -21,7 +21,7 @@ from ..utils.config import app_conf
 
 class CMSMessage(Base, BaseMixin):
 
-    __tablename__ = 'eor_messages'
+    __tablename__ = 'cms_messages'
 
     id             = Column(Unicode, primary_key=True)
     purpose        = Column(Unicode)
