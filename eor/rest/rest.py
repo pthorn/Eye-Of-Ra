@@ -92,13 +92,17 @@ def rest_list(request, entity, list_to_json, get_args=None):
     }
 
 
-def rest_create(request, entity, schema, after_create_obj=None, create_func=None, after_create_func=None):
+def rest_create(request, entity, schema, after_create_obj=None, create_func=None, after_create_func=None, before_update_obj=None):
     try:
         deserialized = schema.deserialize(request.json_body)
     except colander.Invalid, e:
         return {'status': 'invalid', 'errors': e.asdict()}
 
     obj = entity()
+
+    if before_update_obj:
+        before_update_obj(obj, deserialized)
+
     update_entity_from_appstruct(obj, deserialized)
 
     if after_create_obj:
@@ -121,7 +125,7 @@ def rest_create(request, entity, schema, after_create_obj=None, create_func=None
     return {'status': 'ok', 'id': obj.id}
 
 
-def rest_update(request, entity, schema, getter=None, getter_args=None, after_update_obj=None):
+def rest_update(request, entity, schema, getter=None, getter_args=None, before_update_obj=None, after_update_obj=None):
     try:
         deserialized = schema.deserialize(request.json_body)
     except colander.Invalid, e:
@@ -137,6 +141,9 @@ def rest_update(request, entity, schema, getter=None, getter_args=None, after_up
         obj = getter(*getter_args)
     except NoResultFound:
         return {'status': 'error', 'message': u'Объекта не существует, id=%s' % getter_args}
+
+    if before_update_obj:
+        before_update_obj(obj, deserialized)
 
     update_entity_from_appstruct(obj, deserialized)
 
