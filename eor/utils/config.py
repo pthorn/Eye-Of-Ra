@@ -15,7 +15,6 @@ def app_conf(key):
     """
     return an application setting by key
     """
-    global app_settings
     try:
         return app_settings[key]
     except KeyError:
