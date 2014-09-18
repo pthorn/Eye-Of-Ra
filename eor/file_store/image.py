@@ -1,14 +1,21 @@
 # coding: utf-8
 
+from __future__ import unicode_literals
+
 import logging
 log = logging.getLogger(__name__)
 
 import os
+import errno
 import math
 
 from PIL import Image
 
-#from ..utils import app_conf
+from .config import ImageSpec, Original, Thumbnail
+
+
+class NotAnImageException(Exception):
+    pass
 
 
 def get_image_format(file_obj):
@@ -19,37 +26,23 @@ def get_image_format(file_obj):
         return 'jpg'
 
 
-class Thumbnail(object):
-
-    def __init__(self, size, quality, path, keep_proportions=False, original=False):
-        self.size = size
-        self.quality = quality
-        self.path = path
-        self.keep_proportions = keep_proportions
-        self.original = original
-
-
-def make_thumbnail(image, thumb_def):
+def make_thumbnail(image, variant_spec):
 
     # TODO what if image is smaller than thumbnail?!
 
-    if thumb_def.original:
+    if isinstance(variant_spec, Original):
         return image
+
+    assert isinstance(variant_spec, Thumbnail)
 
     image = image.copy()
 
-    if thumb_def.keep_proportions:
-
-        # reduce if larger
-        if image.size[0] > thumb_def.size[0] or image.size[1] > thumb_def.size[1]:
-            image.thumbnail(thumb_def.size, Image.ANTIALIAS)
-
-    else:
+    if variant_spec.exact_size:
 
         # calculate crop window centered on image
         # TODO!!! won't work if original is smaller than thumbnail
-        factor = min(float(image.size[0]) / thumb_def.size[0],  float(image.size[1]) / thumb_def.size[1])
-        crop_size = (thumb_def.size[0] * factor, thumb_def.size[1] * factor)
+        factor = min(float(image.size[0]) / variant_spec.size[0],  float(image.size[1]) / variant_spec.size[1])
+        crop_size = (variant_spec.size[0] * factor, variant_spec.size[1] * factor)
 
         crop = (math.trunc((image.size[0] - crop_size[0]) / 2), math.trunc((image.size[1] - crop_size[1]) / 2),
                    math.trunc((image.size[0] + crop_size[0]) / 2), math.trunc((image.size[1] + crop_size[1]) / 2))
@@ -58,16 +51,17 @@ def make_thumbnail(image, thumb_def):
 
         # crop and reduce
         image = image.crop(crop)
-        image.thumbnail(thumb_def.size, Image.ANTIALIAS)
+        image.thumbnail(variant_spec.size, Image.ANTIALIAS)
+
+    else:
+        # reduce if larger
+        if image.size[0] > variant_spec.size[0] or image.size[1] > variant_spec.size[1]:
+            image.thumbnail(variant_spec.size, Image.ANTIALIAS)
 
     return image
 
 
-class NotAnImageException(Exception):
-    pass
-
-
-def save_uploaded_image(file_obj, thumbnails):
+def save_uploaded_image(file_obj, model_obj):
     """
     save uploaded image at save_path/image_id.type, make thumbnails if any
 
@@ -82,25 +76,32 @@ def save_uploaded_image(file_obj, thumbnails):
         image = Image.open(file_obj.file)
     except IOError, e:
         e_str = str(e)
-        if e_str.find('annot identify image file'):  # not an image
+        if e_str.find('annot identify image file'):
             raise NotAnImageException
         raise
 
     if image.mode != 'RGB':
         image.convert('RGB')
 
-    # TODO
-    def delete(filename):
-        try:
-            os.unlink(filename)
-        except OSError:
-            pass
+    for var_name, var_spec in model_obj.variants.iteritems():
+        save_path = model_obj.get_path(var_name)
+        if os.path.exists(save_path):
+            log.warn('overwriting existing image: %s', save_path)
 
-    for thumb_def in thumbnails:
-        make_thumbnail(image, thumb_def).save(thumb_def.path, quality=thumb_def.quality)
+        save_dir = os.path.dirname(save_path)
+        if not os.path.exists(save_dir):
+            log.warn('save_uploaded_image(): creating directory %s', save_dir)
+            try:
+                os.makedirs(save_dir)
+            except OSError as e:
+                # this can still happen if multiple images are uploaded concurrently
+                if e.errno == errno.EEXIST:
+                    pass
+                else:
+                    raise
 
-    file_obj.file.close() # needed?
+        # TODO save original file for original image?
+        make_thumbnail(image, var_spec)\
+            .save(save_path, quality=var_spec.quality)
 
-#    except(IOError, OSError), err:
-#        log.warn(u'image conversion error: %s' % unicode(err))
-#        return False
+    file_obj.file.close()
