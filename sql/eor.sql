@@ -16,15 +16,16 @@ $$ language 'plpgsql';
 ------------------------------------------------------------------------------------
 
 create table users (
-    login                  text                     not null    primary key, -- also unique on lower()
-    email                  text                     not null, -- unique on lower()
+    login                  text                     not null    primary key, -- unique on lower()
+    email                  text                     not null,                -- also unique on lower()
 
     password_hash          text                     not null    default '',
     -- these are used for both email confirmation and password reset
     confirm_code           text                     not null    default '',
     confirm_time           timestamp                NULL,
 
-    status                 text                     not null    check (status in ('UNCONFIRMED', 'DISABLED', 'ACTIVE', 'PASSWORD_RESET')),
+    status                 text                     not null
+      check (status in ('UNCONFIRMED', 'DISABLED', 'ACTIVE', 'PASSWORD_RESET')),
 
     name                   text                     not null,
 
