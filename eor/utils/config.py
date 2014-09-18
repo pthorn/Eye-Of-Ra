@@ -52,14 +52,14 @@ def parse_app_settings(settings, template, prefix='app.'):
         settings_key = prefix + tpl_key
         
         if 'convert' not in tpl_options:
-             log.warn(u"'convert' not specified for setting %s, assuming unicode" % (tpl_key,))
+             log.warn(u"'convert' not specified for setting %s, assuming unicode", tpl_key)
              tpl_options['convert'] = unicode
              
         if settings_key in settings:
             app_settings[tpl_key] = tpl_options['convert'](settings[settings_key])
         else:
             if 'default' in tpl_options and 'optional' in tpl_options:
-                log.warn(u"both 'default' and 'optional' specified for setting %s" % (tpl_key,))
+                log.warn(u"both 'default' and 'optional' specified for setting %s", tpl_key)
             if 'default' in tpl_options:
                 app_settings[tpl_key] = tpl_options['default']
             elif 'optional' in tpl_options:
@@ -79,10 +79,7 @@ def parse_app_settings(settings, template, prefix='app.'):
         if k.startswith(prefix):
             tpl_key = k[len(prefix):]
             if tpl_key not in template:
-                log.warn(u'unknown app setting found: %s' % (tpl_key,))
-
-    #from med48.utils.redis_caching import redis_parse_settings
-    #redis_parse_settings(app_settings)
+                log.warn(u'unknown app setting found: %s', tpl_key)
 
     log.info("application settings: %s" % ', '.join(['%s=%s' % (k, v) for k, v in app_settings.iteritems()]))
 
