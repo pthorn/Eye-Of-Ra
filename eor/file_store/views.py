@@ -3,7 +3,11 @@
 import logging
 log = logging.getLogger(__name__)
 
+import os
+import errno
+
 from sqlalchemy.orm.exc import NoResultFound
+from sqlalchemy.exc import SQLAlchemyError
 import transaction
 
 from pyramid.httpexceptions import HTTPFound, HTTPNotFound, HTTPBadRequest
@@ -76,14 +80,21 @@ class ImageViews(object):
     def delete_view(self):
         image_id = self.request.matchdict['id']
         try:
-            photo = self.entity.get_by_id(image_id)
+            image = self.entity.get_by_id(image_id)
         except NoResultFound:
             return {'status': 'error', 'code': 'object-not-found'}
 
+        for key in self.entity.variants.keys():
+            try:
+                os.unlink(image.get_path(key))
+            except OSError as e:
+                if e.errno == errno.ENOENT:
+                    pass
+                else:
+                    raise
+
         try:
-            os.unlink(photo.get_path())
-            os.unlink(photo.get_thumb_path())
-            photo.delete()
+            image.delete()
             return {'status': 'ok'}
-        except SQLAlchemyError, e:
+        except SQLAlchemyError as e:
             return {'status': 'error', 'message': u'Ошибка базы данных при удалении\n' + unicode(e).replace(u"' {'", u"'\n{'")}
