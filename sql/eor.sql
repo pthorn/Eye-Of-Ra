@@ -54,29 +54,62 @@ create index confirm_code_idx ON users(confirm_code);
 
 
 create table roles (
-    id                     text                      not null     primary key,
-    name                   text                      not null,
-    description            text                      not null     default ''
-);
-
-create table permissions (
-    permission             text                      not null     primary key,
-    description            text                      not null     default ''
+    id                     text                     not null     primary key,
+    name                   text                     not null,
+    description            text                     not null     default ''
 );
 
 create table user_role_link (
-    user_login            text                      not null    references users(login) on update cascade on delete cascade,
-    role_id               text                      not null    references roles(id) on update cascade on delete cascade,
+    user_login            text                      not null    references users(login)
+      on update cascade on delete cascade,
+    role_id               text                      not null    references roles(id)
+      on update cascade on delete cascade,
+
     primary key (user_login, role_id)
 );
 
-create table role_permissions (
-    role_id               text                      not null    references roles(id) on update cascade on delete cascade,
-    object_type           text                      not null    default '',  -- '' means no ID
-    object_id             text                      not null    default '', -- '' = no ID
-    permission            text                      not null    references permissions(permission) on update cascade on delete cascade,
-    primary key (role_id, permission)
+create table permissions (
+    object_type            text                     not null    default '',
+    permission             text                     not null,
+    description            text                     not null    default '',
+
+    primary key (object_type, permission)
 );
+
+create table role_permissions (
+    role_id               text                      not null    references roles(id)
+      on update cascade on delete cascade,
+    object_type           text                      not null    default '',
+    object_id             text                      not null    default '',  -- '' means no ID
+    permission            text                      not null,
+
+    primary key (role_id, permission),
+
+    foreign key (object_type, permission) references permissions(object_type, permission)
+      on update cascade on delete cascade
+);
+
+------------------------------------------------------------------------------------
+
+insert into roles (id, name) values
+  ('administrator', 'Administrator');
+
+insert into permissions (object_type, permission) values
+  ('admin-panel', 'access'),
+  ('admin-panel', 'admin-only');
+
+insert into role_permissions (role_id, object_type, permission) values
+  ('administrator', 'admin-panel', 'access'),
+  ('administrator', 'admin-panel', 'admin-only');
+
+INSERT INTO users (login, email, password_hash, status, name) VALUES (
+  'admin', 'admin@example.com',
+  '$pbkdf2-sha256$7377$RohxTsmZsxailNK6l5IyBg$lFds1glS9Yp18CfqC1CnRUpTV6FFG0ARSiRazTq94g4',
+  'ACTIVE', 'Admin'
+);
+
+insert into user_role_link values
+  ('admin', 'administrator');
 
 
 ------------------------------------------------------------------------------------
