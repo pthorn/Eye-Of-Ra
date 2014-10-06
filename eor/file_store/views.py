@@ -73,7 +73,7 @@ class ImageViews(object):
             log.exception(u'exception when saving image')
             return {'status': 'error'}
 
-        return {'status': 'ok', 'id': self.obj.id}
+        return {'status': 'ok', 'id': self.obj.id, 'ext': self.obj.ext}
 
     #@view_config(route_name='admin-rest-offerphoto-delete', renderer='json', permission='access')
     # view
