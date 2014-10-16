@@ -92,9 +92,19 @@ def rest_list(request, entity, list_to_json, get_args=None):
     }
 
 
-def rest_create(request, entity, schema, after_create_obj=None, create_func=None, after_create_func=None, before_update_obj=None):
+def rest_create(request, entity, schema,
+                after_create_obj=None,
+                create_func=None,
+                after_create_func=None,
+                before_update_obj=None,
+                id_field='id',
+                cstruct=None):
+
+    if not cstruct:
+        cstruct = request.json_body  # TODO exception!!
+
     try:
-        deserialized = schema.deserialize(request.json_body)
+        deserialized = schema.deserialize(cstruct)
     except colander.Invalid, e:
         return {'status': 'invalid', 'errors': e.asdict()}
 
@@ -122,7 +132,7 @@ def rest_create(request, entity, schema, after_create_obj=None, create_func=None
     if after_create_func:
         after_create_func(obj, deserialized)
 
-    return {'status': 'ok', 'id': obj.id}
+    return {'status': 'ok', 'id': getattr(obj, id_field)}
 
 
 def rest_update(request, entity, schema, getter=None, getter_args=None, before_update_obj=None, after_update_obj=None):
