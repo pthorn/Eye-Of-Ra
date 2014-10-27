@@ -41,40 +41,45 @@ class Captcha(object):
     def validate(cls, remote_addr, form_id, value):
         try:
             return CaptchaEntity.get(remote_addr, form_id).validate(value)
-        except NoResultFound:
-            print '\n---- Captcha.validate: no such entity', remote_addr, form_id, value
+        except NoResultFound:  # captcha expired
             return False
 
     def render(self):
 
         font_file = os.path.join(
              app_conf('captcha-font-path'),
-             random.choice([file for file in os.listdir(app_conf('captcha-font-path')) if fnmatch.fnmatch(file, '*.ttf')]))
+             random.choice([font_file for font_file in os.listdir(app_conf('captcha-font-path')) if fnmatch.fnmatch(font_file, '*.ttf')]))
         font = ImageFont.truetype(font_file, app_conf('captcha-font-size'))
 
+        text_color = random.choice([(190, 0, 0, 255), (37, 37, 37, 255), (0, 0, 127, 255)])
+
         size = font.getsize(self.captcha_entity.value)
-        image = Image.new('RGBA', size, (255, 255, 255, 255))
+        image = Image.new('RGBA', size, (0, 0, 0, 0))
         draw = ImageDraw.Draw(image)
-        draw.text((0, 0), self.captcha_entity.value, font=font, fill=(255, 0, 0, 255))
-        #self.mask = self.img.split()[3]
+        draw.text((0, 0), self.captcha_entity.value, font=font, fill=text_color)
 
         # deform begin
-        
+
         project = lambda orig, dist: orig + random.randint(-1 * dist, dist)
   
         divisions = int(len(self.captcha_entity.value) / 1.5)
-        distorsion = dict(x=20, y=35)
+        distorsion = dict(x=app_conf('captcha-distortion-x'), y=app_conf('captcha-distortion-y'))
+
+        # add margins
+
         margin_img_size = (
             image.size[0] + (2 * distorsion['x']),
             image.size[1] + (2 * distorsion['y']),
         )
-        margins_img = Image.new('RGBA', margin_img_size, (255, 255, 255, 255))
+        margins_img = Image.new('RGBA', margin_img_size, (0, 0, 0, 0))
         margins_img.paste(image, (distorsion['x'], distorsion['y']))
         image = margins_img
-  
+
+        # calculate distortion mesh
+
         last_projected_x = last_projected_y = 0
         mesh = []
-        for pos in xrange(divisions+1):
+        for pos in xrange(divisions + 1):
             x0 = image.size[0] / divisions * pos
             x1 = image.size[0] / divisions * (pos + 1)
             y0 = 0
@@ -93,9 +98,7 @@ class Captcha(object):
                 ),
             ))
             last_projected_x, last_projected_y = projected_x, projected_y
-  
-        #print '000000000000000000000' , mesh
-  
+
         image = image.transform(image.size, Image.MESH, mesh, Image.BICUBIC)
         image = image.crop(image.getbbox())
 

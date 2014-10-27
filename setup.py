@@ -34,7 +34,7 @@ requires = [
     #'pyembed-markdown',
     'bleach',
 
-    'pillow >= 2.5.1',
+    'pillow >= 2.6.1',
 
     #'lxml == 2.3.5',
 

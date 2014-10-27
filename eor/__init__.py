@@ -32,10 +32,6 @@ def includeme(config):
         'main-domain':           dict(convert=unicode),
         'main-domain-base':      dict(convert=unicode),
 
-        'captcha-font-path':     dict(convert=unicode, default=None),  # TODO
-        'captcha-font-size':     dict(convert=int, default=36),
-        'captcha-valid-minutes': dict(convert=int, default=15),
-
         'twitter-api-key':       dict(convert=unicode),
         'twitter-api-secret':    dict(convert=unicode),
 
