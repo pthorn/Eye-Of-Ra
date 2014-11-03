@@ -5,6 +5,7 @@ class Settings(object):
 
     def __init__(self):
         self._user_model = None
+        self._session_class = None
 
     @property
     def user_model(self):
@@ -16,6 +17,17 @@ class Settings(object):
     @user_model.setter
     def user_model(self, model):
         self._user_model = model
+
+    @property
+    def session_class(self):
+        if not self._session_class:
+            from .authentication import SessionUser
+            self._session_class = SessionUser
+        return self._session_class
+
+    @session_class.setter
+    def session_class(self, cls):
+        self._session_class = cls
 
 settings = Settings()
 

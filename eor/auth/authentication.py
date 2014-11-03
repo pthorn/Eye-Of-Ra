@@ -38,7 +38,7 @@ def request_get_user(request):
     """
     reified request property request.user
     """
-    return SessionUser.get(request)
+    return settings.session_class.get(request)
 
 
 def update_activity(event):
@@ -155,14 +155,14 @@ class SessionUser(object):
 ## for use in login/logout views
 ##
 
-def login_user(request, user):
+def login_user(request, user_entity):
     """
     log user in
     note: this function does no checks!
     :return headers
     """
-    session_user = SessionUser(request, user) # put SessionUser into session
-    log.info(u'login, user %s, ip %s' % (user.id, request.ip))
+    session_user = settings.session_class(request, user_entity)  # put SessionUser into session
+    log.info(u'login, user %s, ip %s' % (user_entity.id, request.ip))
     return remember(request, session_user.id)
 
 
