@@ -70,22 +70,21 @@ class SessionUser(object):
     SESSION_KEY = 'user'
     ACTIVITY_UPDATE_MIN = 5
 
-    def __init__(self, request, user):
+    def __init__(self, request, user_entity):
         """
         creates new SessionUser object and puts it into session
         should only be called when logging user in
         """
 
         self.id = None
-        self.email = None
         self.real_name = None
 
+        user_entity.update_last_login()
+
         self.last_activity_update = datetime.datetime.min
+        user_entity.update_last_activity()
 
-        self.update_from_entity(user)
-
-        user.update_last_login()    # write to db
-        user.update_last_activity() # write to db
+        self.update_from_entity(user_entity)
 
         request.session[self.SESSION_KEY] = self  # place self into session
 
@@ -100,54 +99,43 @@ class SessionUser(object):
         try:
             return settings.user_model.get_by_id(self.id)
         except NoResultFound:
-            pass  # TODO!! entity does not exist -> log user out!
+            log.warn(u'SessionUser.get_entity(): entity not found, id %s', self.id)
+            # TODO!! entity does not exist -> log user out!
 
     def update_from_entity(self, user_entity):
         """
         id must be available as user_entity.id
         """
-        # TODO session.changed()!
-
         self.id = user_entity.id
-
-        # TODO this is application-specific
-        self.email = user_entity.email
         self.real_name = user_entity.name or user_entity.login
-
-        # social ids TODO where are these used?
-        #self.twitter_id   = user_entity.twitter_user_id
-        #self.facebook_id  = user_entity.facebook_user_id
-        #self.vkontakte_id = user_entity.vkontakte_user_id
 
     def update_activity(self):
         """
         update last activity time in database if it's older than n minutes
         """
         if datetime.datetime.now() - self.last_activity_update > datetime.timedelta(minutes=self.ACTIVITY_UPDATE_MIN):
-            log.info('update_activity()')
-            from .. import models
-            user_entity = settings.user_model.get_by_id(self.id)
-            self.update_from_entity(user_entity) # update user details in case they changed
+            log.debug('update_activity(), id %s', self.id)
+            user_entity = self.get_entity()
+
             user_entity.update_last_activity()
             self.last_activity_update = datetime.datetime.now()
 
+            self.update_from_entity(user_entity)  # update user details in case they changed
+
+            # TODO session.changed()!
+
     def has_role(self, role_id):
-        from .. import models
         return settings.user_model.has_role(self.id, role_id)
 
     # TODO memoize somehow?
     def has_permission(self, permission, object_type, object_id=None):
-        from .. import models
         return settings.user_model.has_permission_for_object_type(permission, object_type, object_id)
 
     def __unicode__(self):
         return u'User(id={id}, email={email}, real_name={real_name}'.format(
             id = self.id,
             email = self.email,
-            real_name = self.real_name#,
-            #twitter_id = self.twitter_id,
-            #facebook_id = self.facebook_id,
-            #vkontakte_id = self.vkontakte_id
+            real_name = self.real_name
         )
 
 
