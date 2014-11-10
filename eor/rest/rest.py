@@ -210,8 +210,8 @@ def entity_as_dict(entity, include=None, additional=None, remove=None):
     return res
 
 
-def entities_as_list(lst, include):
-    return[entity_as_dict(e, include) for e in lst]
+def entities_as_list(lst, include=None, additional=None, remove=None):
+    return[entity_as_dict(e, include, additional, remove) for e in lst]
 
 
 def update_entity_from_appstruct(entity, appstruct):
