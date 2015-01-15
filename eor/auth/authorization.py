@@ -1,6 +1,7 @@
 # coding: utf-8
 
 import logging
+import collections
 log = logging.getLogger(__name__)
 
 from pyramid.security import authenticated_userid
@@ -41,7 +42,7 @@ def ebff(entity_name, object_id_getter=None, acl=None):
                 if app_conf('debug-auth'):
                     log.info('EntityFactory.__acl__(): acl %s' % acl)
                 return acl
-            except Exception, e:
+            except Exception as e:
                 log.error('!!!!!!!!!!!!! exception in get_permissions_for_object_type(): %s %s' % (type(e), e))
                 return []
 
@@ -68,7 +69,7 @@ class EntityResource(object):
         # [ (Allow, '<user_id>', 'view') ]
         # takes into account user's groups in a single database query
         if app_conf('debug-auth'):
-            print '>>>>>>> EntityFactory.__acl__: user_id =', self.user_id, 'object type =', self.entity, 'object id =', self.entity_id
+            print('>>>>>>> EntityFactory.__acl__: user_id =', self.user_id, 'object type =', self.entity, 'object id =', self.entity_id)
         return permissions_for_entity_from_database(self.user_id, self.entity, self.entity_id)
 
 
@@ -160,7 +161,7 @@ class ACLAuthorizationPolicy2(object):
             except AttributeError:
                 continue
 
-            if acl and callable(acl):
+            if acl and isinstance(acl, collections.Callable):
                 acl = acl()
 
             for ace in acl:
@@ -191,7 +192,7 @@ class ACLAuthorizationPolicy2(object):
         attached to the ``context`` as well as inherited ACLs based on
         the :term:`lineage`."""
 
-        print '>>>>>>>>>> principals_allowed_by_permission: context =', context, 'permission =', permission
+        print('>>>>>>>>>> principals_allowed_by_permission: context =', context, 'permission =', permission)
 
         allowed = set()
 

@@ -4,7 +4,7 @@ import logging
 log = logging.getLogger(__name__)
 
 import datetime
-import urlparse
+import urllib.parse
 
 from sqlalchemy.orm.exc import NoResultFound
 import transaction
@@ -46,7 +46,7 @@ class LoginViews(object):
     # TODO this is authorization
     def user_can_login(self, user):
         if user.status != 'ACTIVE':
-            log.info(u'login failed: %s: status %s, ip %s' % (login, user.status, self.request.ip))
+            log.info('login failed: %s: status %s, ip %s' % (login, user.status, self.request.ip))
             return False
         return True
 
@@ -86,12 +86,12 @@ class LoginViews(object):
             return dict()
 
         if not user.check_password(c.form.password.value):
-            log.info(u'login failed: bad password, user %s, ip %s' % (c.form.login.value, request.ip))
+            log.info('login failed: bad password, user %s, ip %s' % (c.form.login.value, request.ip))
             add_flash_message(request, 'bad_login')
             return dict()
 
         if not self.user_can_login(user):
-            log.info(u'login failed: user %s, status %s, ip %s' % (c.form.login.value, user.status, request.ip))
+            log.info('login failed: user %s, status %s, ip %s' % (c.form.login.value, user.status, request.ip))
             add_flash_message(request, 'bad_login')
             return dict()
 
@@ -151,7 +151,7 @@ def register(request):
     form = SmallForm(validators=[passwords_match])
     StringField(form, 'login',      required=True, validators=[login_validator, user_login_unique])
     StringField(form, 'email',      required=True, validators=[
-        colander.Email(u'Неправильный формат email адреса'), user_email_unique()
+        colander.Email('Неправильный формат email адреса'), user_email_unique()
     ])
     StringField(form, 'name',       required=True)
     StringField(form, 'password1',  required=True)
@@ -162,7 +162,7 @@ def register(request):
         return dict()
 
     if request.method == 'POST':
-        c.form = form.from_submitted(request.POST.items())
+        c.form = form.from_submitted(list(request.POST.items()))
         if not c.form.valid:
             # passwords_match
             if c.form.error:
@@ -187,7 +187,7 @@ def register(request):
                 url   = request.route_url('confirm-user', code=confirm_code)
             ))
             return render_auto_page('user-registered', request, dict(user=user))
-        except EmailException, e:
+        except EmailException as e:
             transaction.doom()
             return render_auto_page('error-sending-email', request, dict(email=c.form.email.value))
 
@@ -238,21 +238,21 @@ def reset_password(request):
         try:
             user = settings.user_model.get_by_email(value)
             if user.status == settings.user_model.DISABLED:
-                raise colander.Invalid(node, u'Пользователь заблокирован.')
+                raise colander.Invalid(node, 'Пользователь заблокирован.')
         except NoResultFound:
-            raise colander.Invalid(node, u'Пользователь с таким email адресом у нас не зарегистрирован.')
+            raise colander.Invalid(node, 'Пользователь с таким email адресом у нас не зарегистрирован.')
 
     reset_form = SmallForm()
-    StringField(reset_form, 'email', required=True, validators=[colander.Email(u'Неправильный формат email адреса'), user_valid])
+    StringField(reset_form, 'email', required=True, validators=[colander.Email('Неправильный формат email адреса'), user_valid])
 
     if request.method == 'GET':
         c.form = reset_form.from_object()
         return dict()
 
     if request.method == 'POST':
-        c.form = reset_form.from_submitted(request.POST.items())
+        c.form = reset_form.from_submitted(list(request.POST.items()))
         if not c.form.valid:
-            if (c.form.email.error or u'').find(u'заблокирован') != -1:
+            if (c.form.email.error or '').find('заблокирован') != -1:
                 c.user_blocked = True
             return dict()
 
@@ -271,8 +271,8 @@ def reset_password(request):
                 url = request.route_url('reset-password-do', code=confirm_code)
             ))
             return render_auto_page('reset-email-sent', request, dict(user=user))
-        except EmailException, e:
-             c.message = u'Ошибка: ' + unicode(e) # TODO!
+        except EmailException as e:
+             c.message = 'Ошибка: ' + str(e) # TODO!
 
     # neither GET nor POST
     return HTTPNotFound()
@@ -287,7 +287,7 @@ def reset_password_do(request):
 
     def passwords_match(node, value):
         if node.get_value(value, 'new_password_1') != node.get_value(value, 'new_password_2'):
-            raise colander.Invalid(node, u'Пароли не совпадают')
+            raise colander.Invalid(node, 'Пароли не совпадают')
 
     password_change_form = SmallForm(validators=[passwords_match])
     StringField(password_change_form, 'login',           required=True)
@@ -312,7 +312,7 @@ def reset_password_do(request):
         return dict()
 
     if request.method == 'POST':
-        c.form = password_change_form.from_submitted(request.POST.items())
+        c.form = password_change_form.from_submitted(list(request.POST.items()))
         if not c.form.valid:
             # passwords_match
             if c.form.error:

@@ -1,6 +1,6 @@
 # coding: utf-8
 
-from urlparse import urlparse
+from urllib.parse import urlparse
 
 import markdown
 from markdown.postprocessors import Postprocessor
