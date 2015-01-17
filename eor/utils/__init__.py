@@ -1,6 +1,6 @@
 # coding: utf-8
 
-from .config import app_conf
+from .settings import setting, app_conf
 from .send_email import send_email, send_auto_email, EmailException
 
 
