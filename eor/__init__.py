@@ -6,7 +6,7 @@ log = logging.getLogger(__name__)
 from pyramid.config import Configurator
 from pyramid.settings import asbool
 
-from .utils.config import app_conf, as_list
+from .utils import app_conf
 
 
 def includeme(config):

@@ -8,7 +8,7 @@ from sqlalchemy.orm.exc import NoResultFound
 from mako.template import Template
 from mako.exceptions import MakoException
 
-from .config import app_conf
+from .settings import app_conf
 
 
 import logging

@@ -16,7 +16,7 @@ from sqlalchemy import event
 from zope.sqlalchemy import mark_changed
 
 from . import Session
-from ..utils.config import app_conf
+from ..utils import app_conf
 from ..file_store.config import Original, Thumbnail
 from ..render.template_helpers import subdomain
 
