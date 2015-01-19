@@ -27,15 +27,15 @@ def render_message(message_id, request, subst=None, status=200):
     try:
         c.message = models.CMSMessage.get_by_id(message_id)
     except NoResultFound:
-        log.error(u'render_message(): unknown message_id %s' % message_id)
+        log.error('render_message(): unknown message_id %s' % message_id)
         return HTTPNotFound()
 
     if subst:
         c.message.expunge() # prevent saving interpolated content to database
         try:
             c.message.content = Template(c.message.content, default_filters=['h']).render_unicode(**subst)
-        except KeyError, e: # TODo mako exc!
-            log.error(u"render_message(): interpolation error: message_id %s, key %s" % (message_id, unicode(e)))
+        except KeyError as e: # TODo mako exc!
+            log.error("render_message(): interpolation error: message_id %s, key %s" % (message_id, str(e)))
             return HTTPNotFound()
 
     response = render_to_response(settings.message_template, dict(), request=request)
@@ -51,5 +51,5 @@ class FlashMessage(object):
         self.params = AttrDict(kwargs)
 
 
-def add_flash_message(request, message_id, queue=u'', **kwargs):
+def add_flash_message(request, message_id, queue='', **kwargs):
     request.session.flash(FlashMessage(message_id, queue, **kwargs), queue)

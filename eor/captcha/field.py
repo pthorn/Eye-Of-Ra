@@ -41,11 +41,11 @@ class CaptchaValidator(object):
             raise ValueError("CaptchaValidator can only be attached to a CaptchaField")
 
         self.field = field
-        self.message = message or u"Неправильный код подтверждения"
+        self.message = message or "Неправильный код подтверждения"
 
     def __call__(self, node, value):
         remote_addr = self.field.request.client_addr
-        print '\n---- request.remote_addr:', self.field.request.client_addr
+        print('\n---- request.remote_addr:', self.field.request.client_addr)
         if not Captcha.validate(remote_addr, self.field.form_id, value):
             node.raise_invalid(self.message)
 
@@ -57,7 +57,7 @@ class CaptchaField(Field):
             form,
             name,
             colander.String(),
-            u'',  # default
+            '',  # default
             _nothing, # missing: always required
             [CaptchaValidator(self)],
             CaptchaWidget(use_data_src)

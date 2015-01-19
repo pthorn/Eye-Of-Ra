@@ -27,8 +27,8 @@ def send_email(to, subject, body, html=False):
         msg['To'] = to
         msg['Subject'] = subject
         smtp_host = app_conf('smtp-host')
-    except KeyError, e:
-        msg = u'ошибка в параметрах email: не указан параметр %s' % unicode(e)
+    except KeyError as e:
+        msg = 'ошибка в параметрах email: не указан параметр %s' % str(e)
         log.error(msg)
         raise EmailException(msg)
 
@@ -36,9 +36,9 @@ def send_email(to, subject, body, html=False):
         s = smtplib.SMTP(smtp_host)
         s.sendmail(msg['From'], msg['To'], msg.as_string())
         s.quit()
-        log.info(u'отправлено сообщение %s, тема [%s]' % (to, subject))
-    except Exception, e:
-        msg = u'ошибка отправки сообщения на адрес %s, %s, smtp-host=%s' % (to, unicode(e), smtp_host)
+        log.info('отправлено сообщение %s, тема [%s]' % (to, subject))
+    except Exception as e:
+        msg = 'ошибка отправки сообщения на адрес %s, %s, smtp-host=%s' % (to, str(e), smtp_host)
         log.error(msg)
         raise EmailException(msg)
 
@@ -48,15 +48,15 @@ def send_auto_email(to, template_id, subst=None):
     def mako_subst(tpl, subst):
         try:
             return Template(tpl, default_filters=['h']).render_unicode(**subst)
-        except MakoException, e:
-            log.error(u'Mako exception: ' + unicode(e))
-            raise EmailException(u'Mako exception: ' + unicode(e))
+        except MakoException as e:
+            log.error('Mako exception: ' + str(e))
+            raise EmailException('Mako exception: ' + str(e))
 
     from ..models import AutoEmailTemplate
     try:
         template = AutoEmailTemplate.get_by_id(template_id)
     except NoResultFound:
-        msg = u'шаблон сообщения %s не найден' % template_id
+        msg = 'шаблон сообщения %s не найден' % template_id
         log.error(msg)
         raise EmailException(msg)
     if subst:

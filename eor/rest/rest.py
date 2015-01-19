@@ -41,7 +41,7 @@ def rest_get_by_id(request, entity, getter=None, getter_args=None, additional=No
     try:
         obj = getter(*getter_args)
     except NoResultFound:
-        return {'status': 'error', 'message': u'Объекта не существует.'}
+        return {'status': 'error', 'message': 'Объекта не существует.'}
 
     return {'status': 'ok', 'data': entity_as_dict(obj, additional=additional)}
 
@@ -66,14 +66,14 @@ def rest_list(request, entity, list_to_json, get_args=None):
 
     order_s = request.params.get('o', None)
     if order_s:
-        order = {'col': order_s.lstrip('-'),'dir': 'desc' if order_s.startswith(u'-') else 'asc'}
+        order = {'col': order_s.lstrip('-'),'dir': 'desc' if order_s.startswith('-') else 'asc'}
     else:
         order = None
 
     search = request.params.get('q', None)
 
     filters = dict()
-    for param, val in request.params.iteritems():
+    for param, val in request.params.items():
         if param.startswith('f'):
             filters[param[1:]] = val
 
@@ -82,8 +82,8 @@ def rest_list(request, entity, list_to_json, get_args=None):
 
     try:
         count, objs = entity.get_for_rest_grid(start, limit, order=order, search=search, filters=filters or None, **get_args)
-    except SQLAlchemyError, e:
-        return {'status': 'error', 'message': unicode(e)}
+    except SQLAlchemyError as e:
+        return {'status': 'error', 'message': str(e)}
 
     return {
         'status': 'ok',
@@ -105,7 +105,7 @@ def rest_create(request, entity, schema,
 
     try:
         deserialized = schema.deserialize(cstruct)
-    except colander.Invalid, e:
+    except colander.Invalid as e:
         return {'status': 'invalid', 'errors': e.asdict()}
 
     obj = entity()
@@ -123,11 +123,11 @@ def rest_create(request, entity, schema,
     else:
         try:
             obj.add(flush=True)
-        except SQLAlchemyError, e:
-            exc_message = str(e).decode('utf-8', errors='replace').replace(u"' {'", u"'\n{'")
-            log.warn(u'exception: %s' % exc_message)
+        except SQLAlchemyError as e:
+            exc_message = str(e).decode('utf-8', errors='replace').replace("' {'", "'\n{'")
+            log.warn('exception: %s' % exc_message)
             #log_access(request, 'EXCEPTION save %s id=%s %s' % (obj.__class__.__name__, obj.id, unicode(exc))) TODO
-            return {'status': 'error', 'message': u'Ошибка базы данных при сохранении\n' + exc_message}
+            return {'status': 'error', 'message': 'Ошибка базы данных при сохранении\n' + exc_message}
 
     if after_create_func:
         after_create_func(obj, deserialized)
@@ -138,7 +138,7 @@ def rest_create(request, entity, schema,
 def rest_update(request, entity, schema, getter=None, getter_args=None, before_update_obj=None, after_update_obj=None):
     try:
         deserialized = schema.deserialize(request.json_body)
-    except colander.Invalid, e:
+    except colander.Invalid as e:
         return {'status': 'invalid', 'errors': e.asdict()}
 
     if not getter:
@@ -150,7 +150,7 @@ def rest_update(request, entity, schema, getter=None, getter_args=None, before_u
     try:
         obj = getter(*getter_args)
     except NoResultFound:
-        return {'status': 'error', 'message': u'Объекта не существует, id=%s' % getter_args}
+        return {'status': 'error', 'message': 'Объекта не существует, id=%s' % getter_args}
 
     if before_update_obj:
         before_update_obj(obj, deserialized)
@@ -162,9 +162,9 @@ def rest_update(request, entity, schema, getter=None, getter_args=None, before_u
 
     try:
         obj.add(flush=True)
-    except SQLAlchemyError, e:
+    except SQLAlchemyError as e:
         #log_access(request, 'EXCEPTION save %s id=%s %s' % (obj.__class__.__name__, obj.id, unicode(exc))) TODO
-        return {'status': 'error', 'message': u'Ошибка базы данных при сохранении\n' + unicode(e).replace(u"' {'", u"'\n{'")} # TODO e
+        return {'status': 'error', 'message': 'Ошибка базы данных при сохранении\n' + str(e).replace("' {'", "'\n{'")} # TODO e
 
     return {'status': 'ok', 'id': obj.id}
 
@@ -195,7 +195,7 @@ def entity_as_dict(entity, include=None, additional=None, remove=None):
 
     res = dict()
     for key in include:
-        if isinstance(key, basestring):
+        if isinstance(key, str):
             res[key] = getattr(entity, key)
         else:
             p = entity
@@ -215,7 +215,7 @@ def entities_as_list(lst, include=None, additional=None, remove=None):
 
 
 def update_entity_from_appstruct(entity, appstruct):
-    for key, val in appstruct.iteritems():
+    for key, val in appstruct.items():
         if val is not do_not_set:
             setattr(entity, key, val)
 
@@ -225,7 +225,7 @@ def update_entity_from_appstruct(entity, appstruct):
 
 class MyDate(object):
 
-    def __init__(self, format=u"%d.%m.%Y"):
+    def __init__(self, format="%d.%m.%Y"):
         self.format = format
 
     def serialize(self, node, appstruct):
@@ -247,12 +247,12 @@ class MyDate(object):
         try:
             return datetime.datetime.strptime(cstruct, self.format).date()
         except ValueError:
-            raise colander.Invalid(node, u"Неправильный формат даты")
+            raise colander.Invalid(node, "Неправильный формат даты")
 
 
 class MyDateTime(object):
 
-    def __init__(self, format=u"%d.%m.%Y %H:%M:%S"):
+    def __init__(self, format="%d.%m.%Y %H:%M:%S"):
         self.format = format
 
     def serialize(self, node, appstruct):
@@ -271,7 +271,7 @@ class MyDateTime(object):
         try:
             return datetime.datetime.strptime(cstruct, self.format)
         except ValueError:
-            raise colander.Invalid(node, u"Неправильный формат даты/времени")
+            raise colander.Invalid(node, "Неправильный формат даты/времени")
 
 
 class MyFile(object):
@@ -285,9 +285,9 @@ class MyFile(object):
     def deserialize(self, node, cstruct):
         # cgi.FieldStorage seems to be always false. however, when user
         # doesn't select a file cstructs seems to be u'' so test for that
-        if cstruct is colander.null or (isinstance(cstruct, basestring) and not cstruct):
+        if cstruct is colander.null or (isinstance(cstruct, str) and not cstruct):
             return colander.null
         import cgi
         if not isinstance(cstruct, cgi.FieldStorage):
-            raise colander.Invalid(node, u"expected FieldStorage (how about some enctype?)")
+            raise colander.Invalid(node, "expected FieldStorage (how about some enctype?)")
         return cstruct
