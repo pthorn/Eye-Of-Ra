@@ -3,7 +3,7 @@
 import logging
 log = logging.getLogger(__name__)
 
-from .sqlalchemy_base import Session, Base, BaseMixin
+from .sqlalchemy_base import Session, Base
 from .cms import CMSMessage, Page
 from .user import Role, User
 
@@ -16,7 +16,7 @@ def includeme(config):
 
 __all__ = [
     includeme,
-    Session, Base, BaseMixin,
+    Session, Base,
     Page,
     CMSMessage,
     Role,

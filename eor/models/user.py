@@ -14,13 +14,13 @@ from sqlalchemy.sql.expression import func, case
 
 from zope.sqlalchemy import mark_changed
 
-from . import Base, Session, BaseMixin
+from . import Base, Session
 from ..utils import app_conf
 
 from .user_mixins import UserModelMixin, SocialMixin
 
 
-class Role(Base, BaseMixin):
+class Role(Base):
 
     __tablename__ = 'roles'
 
@@ -59,7 +59,7 @@ user_role_link = Table(
 )
 
 
-class RolePermission(Base, BaseMixin):
+class RolePermission(Base):
 
     __tablename__ = 'role_permissions'
 
@@ -73,7 +73,7 @@ class RolePermission(Base, BaseMixin):
 
 #user_status_choices = [(u'UNCONFIRMED', u'Не подтвержден'), (u'ACTIVE', u'Активен'), (u'DISABLED', u'Заблокирован')]
 
-class User(Base, BaseMixin, UserModelMixin, SocialMixin):
+class User(Base, UserModelMixin):  # TODO , SocialMixin):
 
     __tablename__ = 'users'
 

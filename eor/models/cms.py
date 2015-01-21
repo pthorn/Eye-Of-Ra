@@ -14,12 +14,12 @@ from sqlalchemy.sql.expression import func, case
 
 from zope.sqlalchemy import mark_changed
 
-from . import Base, Session, BaseMixin
+from . import Base, Session
 from ..utils import app_conf
 
 
 
-class CMSMessage(Base, BaseMixin):
+class CMSMessage(Base):
 
     __tablename__ = 'cms_messages'
 
@@ -34,7 +34,7 @@ class CMSMessage(Base, BaseMixin):
     updated        = Column(DateTime, FetchedValue())
 
 
-class AutoEmailTemplate(Base, BaseMixin):
+class AutoEmailTemplate(Base):
 
     __tablename__ = 'auto_email_templates'
 
@@ -56,7 +56,7 @@ class AutoEmailTemplate(Base, BaseMixin):
 
 #     level               text                not null    check (level in ('DEBUG', 'INFO', 'NOTE', 'WARNING', 'ERROR', 'CRITICAL')),
 
-class LogMessage(Base, BaseMixin):
+class LogMessage(Base):
 
     __tablename__ = 'log_messages'
 
@@ -87,7 +87,7 @@ class LogMessage(Base, BaseMixin):
         log_message.add() # TODO handle exception!
 
 
-class Page(Base, BaseMixin):
+class Page(Base):
 
     __tablename__ = 'pages'
 
