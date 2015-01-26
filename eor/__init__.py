@@ -59,12 +59,6 @@ def includeme(config):
     config.include('.render')
     config.include('.asset_utils')
     config.include('.auth')
-    config.include('.captcha')
-    # TODO rest
-
-    ## scan
-
-    #config.scan() TODO
 
     ## done
 
