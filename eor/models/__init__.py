@@ -4,7 +4,7 @@ import logging
 log = logging.getLogger(__name__)
 
 from .sqlalchemy_base import Session, Base
-from .cms import CMSMessage, Page
+from .cms import CMSMessage, AutoEmailTemplate, Page
 from .user import Role, User
 
 
@@ -18,7 +18,7 @@ __all__ = [
     includeme,
     Session, Base,
     Page,
-    CMSMessage,
+    CMSMessage, AutoEmailTemplate, Page,
     Role,
     User
 ]
