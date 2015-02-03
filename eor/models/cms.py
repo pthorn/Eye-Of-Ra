@@ -95,14 +95,14 @@ class Page(Base):
 
     title          = Column(Unicode)
     content        = Column(Unicode)
-    head           = Column(Unicode)
+    head           = Column(Unicode, server_default='')
 
-    meta_kw        = Column(Unicode)
-    meta_desc      = Column(Unicode)
+    meta_kw        = Column(Unicode, server_default='')
+    meta_desc      = Column(Unicode, server_default='')
 
-    status         = Column(Unicode)
+    status         = Column(Unicode, server_default='DISABLED')
 
-    comment        = Column(Unicode)
+    comment        = Column(Unicode, server_default='')
     added          = Column(DateTime, FetchedValue())
     updated        = Column(DateTime, FetchedValue())
 
