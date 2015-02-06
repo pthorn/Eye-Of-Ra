@@ -81,37 +81,31 @@ class User(Base, UserModelMixin):  # TODO , SocialMixin):
     email          = Column(Unicode)  # unique
 
     password_hash  = Column(Unicode, server_default='')
-    confirm_code   = Column(Unicode)
-    confirm_time   = Column(DateTime)
+    confirm_code   = Column(Unicode)   # nullable
+    confirm_time   = Column(DateTime)  # nullable
 
     status         = Column(Unicode)
 
-    name           = Column(Unicode)
-
-    avatar_date    = Column(DateTime, server_default='')
+    name           = Column(Unicode, server_default='')
 
     registered     = Column(DateTime, FetchedValue())
     last_login     = Column(DateTime)
     last_activity  = Column(DateTime)
 
-    comment        = Column(Unicode)
+    comment        = Column(Unicode, server_default='')
 
     roles = relationship(Role, secondary=user_role_link, backref="users")
 
-    _rest_search_columns = [login, name, email]
+    _rest_search_columns = [login]
 
     # status
     UNCONFIRMED    = 'UNCONFIRMED'
     DISABLED       = 'DISABLED'
     ACTIVE         = 'ACTIVE'
-    PASSWORD_RESET = 'PASSWORD_RESET'
 
     def __init__(self, **kwargs):
-        self.contacts = u''
-        self.comment = u''
-        self.groups = u''
-        self.confirm_code = u''
         super(User, self).__init__(**kwargs)
+        self.status = self.UNCONFIRMED
 
     @property
     def id(self):
@@ -182,22 +176,3 @@ class User(Base, UserModelMixin):  # TODO , SocialMixin):
         self.confirm_code = hex(random.getrandbits(bytes*8))[2:-1]
         self.confirm_time = datetime.datetime.now()
         return self.confirm_code
-
-    @classmethod
-    def get_choices(cls):
-        """
-        for a form select field
-        [(id, name), ...]
-        """
-        # TODO support filtering for autocomplete widget
-        return Session.query(cls.login, cls.name).order_by(cls.login).all()
-
-    #@classmethod
-    #def get_all(cls):
-    #    return Session.query(cls).order_by(cls.login).all()
-    #
-    #@classmethod
-    #def get_choices_for_m2m(cls):
-    #    res = cls.get_all()
-    #    #return [(obj.id, obj.name)  for obj in res]
-    #    return [( [(obj.login, obj.login)  for obj in res], u'AAA') ]
