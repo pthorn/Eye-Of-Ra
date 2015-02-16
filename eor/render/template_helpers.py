@@ -4,14 +4,8 @@ from ..utils import app_conf
 import markupsafe
 
 
-_main_domain_base = None
-
-def subdomain(subd):
-    global _main_domain_base
-    if not _main_domain_base:
-        _main_domain_base = app_conf('main-domain-base')
-
-    return subd + '.' + _main_domain_base
+def static_domain():
+    return app_conf('eor.static-domain')
 
 
 def css_class(**kwargs):
@@ -25,7 +19,7 @@ def static_serial():
     .ini: app.static-serial = 1
     <script src="/site/js/site.js${h.static_serial() | n}"></script>
     """
-    serial = app_conf('static-serial')
+    serial = app_conf('eor.static-serial')
     return u'?%s' % serial if serial else u''
 
 
