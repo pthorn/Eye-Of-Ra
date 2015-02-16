@@ -16,31 +16,13 @@ def includeme(config):
 
     ## settings
 
-    from .utils.config import parse_app_settings
-    # 'qooxdoo-app-version': dict(convert=unicode, variants=['source', 'build'], default='build')
-    parse_app_settings(settings, {
-        'debug-auth':            dict(convert=asbool, default=False),
-        'static-serial':         dict(convert=unicode, default=''),
-        'store-path':            dict(convert=unicode),
+    from .utils.settings import ParseSettings
 
-        'less':                  dict(convert=unicode, default='static'),
-        'lessc-path':            dict(convert=unicode),
-
-        'email-from':            dict(convert=unicode),
-        'smtp-host':             dict(convert=unicode, default='localhost'),
-
-        'main-domain':           dict(convert=unicode),
-        'main-domain-base':      dict(convert=unicode),
-
-        'twitter-api-key':       dict(convert=unicode),
-        'twitter-api-secret':    dict(convert=unicode),
-
-        'facebook-app-id':       dict(convert=unicode),
-        'facebook-app-secret':   dict(convert=unicode),
-
-        'vkontakte-app-id':      dict(convert=unicode),
-        'vkontakte-app-secret':  dict(convert=unicode)
-    })
+    (ParseSettings(settings, prefix='eor.')
+        .string('mode', default='dev', variants=('dev', 'prod'))
+        .string('domain')  # TODO in asset_utils?
+        .string('static-domain')
+        .string('static-serial', default=''))
 
     ## sessions
 
@@ -55,7 +37,7 @@ def includeme(config):
 
     config.include('.utils')
     config.include('.error')
-    config.include('.models')
+    config.include('.models')  # initialize sqlalchemy, connect to database
     config.include('.render')
     config.include('.asset_utils')
     config.include('.auth')
@@ -63,14 +45,3 @@ def includeme(config):
     ## done
 
     log.info("app server initialized")
-
-
-"""
-    run from pserve
-    
-from tfadmin.models import initialize_sqlalchemy
-initialize_sqlalchemy({'sqlalchemy.url': 'postgresql+psycopg2://tf:tf@localhost/tf'})
-from sqlalchemy.orm import compile_mappers ; compile_mappers()
-from tfadmin.models import Session
-from tfadmin.models.contracts import Client, Contract
-"""
