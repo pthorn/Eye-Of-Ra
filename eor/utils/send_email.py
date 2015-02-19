@@ -23,10 +23,10 @@ def send_email(to, subject, body, html=False):
 
     msg = MIMEText(body, 'html' if html else 'plain', 'utf-8')
     try:
-        msg['From'] = app_conf('email-from')
+        msg['From'] = app_conf('eor.email-from')
         msg['To'] = to
         msg['Subject'] = subject
-        smtp_host = app_conf('smtp-host')
+        smtp_host = app_conf('eor.smtp-host')
     except KeyError as e:
         msg = 'ошибка в параметрах email: не указан параметр %s' % str(e)
         log.error(msg)

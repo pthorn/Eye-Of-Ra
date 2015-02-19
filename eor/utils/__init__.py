@@ -17,3 +17,9 @@ class AttrDict(dict):
 def includeme(config):
     from .request_utils import get_ip
     config.add_request_method(get_ip, 'ip', reify=True)
+
+    from .settings import ParseSettings
+
+    (ParseSettings(config.get_settings(), prefix='eor.')
+        .string('email-from', default='root@localhost')
+        .string('smtp-host', default='localhost'))
