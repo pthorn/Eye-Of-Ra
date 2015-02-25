@@ -10,7 +10,7 @@ from mako.template import Template
 
 from sqlalchemy.orm.exc import NoResultFound
 
-from . import settings
+from eor.config import config
 from ..utils import AttrDict
 
 
@@ -38,7 +38,7 @@ def render_message(message_id, request, subst=None, status=200):
             log.error("render_message(): interpolation error: message_id %s, key %s" % (message_id, str(e)))
             return HTTPNotFound()
 
-    response = render_to_response(settings.message_template, dict(), request=request)
+    response = render_to_response(config.message_template, dict(), request=request)
     response.status_int = status
     return response
 
