@@ -1,5 +1,6 @@
 # coding: utf-8
 
+from .pager import Pager
 from .messages import render_message, add_flash_message
 from .markdown_utils import render_markdown
 
