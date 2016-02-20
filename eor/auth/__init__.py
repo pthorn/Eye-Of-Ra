@@ -39,11 +39,10 @@ from .views_auth import LoginViews
 
 def includeme(config):
 
-    from ..utils.settings import ParseSettings
+    from eor_settings import ParseSettings
 
-    (ParseSettings(config.get_settings(), prefix='eor.')
+    (ParseSettings(config.get_settings(), prefix='eor')
         .bool('debug-auth', default=False))
-
 
     # TODO consolidate resource factories
     from pyramid.security import authenticated_userid, Allow, Authenticated, DENY_ALL

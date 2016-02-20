@@ -2,7 +2,7 @@
 
 import markupsafe
 
-from ..utils import app_conf
+from eor_settings import get_setting
 from ..asset_utils import webpack_asset
 
 

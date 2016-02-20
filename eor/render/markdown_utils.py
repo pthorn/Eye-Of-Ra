@@ -9,8 +9,6 @@ from markdown import Extension
 import bleach
 from html5lib.sanitizer import HTMLSanitizer
 
-from ..utils import app_conf
-
 
 ##
 ## linkify

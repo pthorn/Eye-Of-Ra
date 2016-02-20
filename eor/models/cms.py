@@ -15,7 +15,6 @@ from sqlalchemy.sql.expression import func, case
 from zope.sqlalchemy import mark_changed
 
 from . import Base, Session
-from ..utils import app_conf
 
 
 

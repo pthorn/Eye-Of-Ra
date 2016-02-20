@@ -6,7 +6,7 @@ log = logging.getLogger(__name__)
 
 from pyramid.security import authenticated_userid
 
-from ..utils import app_conf
+from eor_settings import get_setting
 
 
 def configure(config):
@@ -35,11 +35,11 @@ def ebff(entity_name, object_id_getter=None, acl=None):
             from ..models import User
             try:
                 object_id = object_id_getter(self.request) if object_id_getter else None
-                if app_conf('eor.debug-auth'):
+                if get_setting('eor.debug-auth'):
                     log.info('EntityFactory.__acl__(): user_id %s, object type %s, object id %s' % (self.user_id, self.entity,  object_id))
                 permissions = User.get_permissions_for_object_type(self.user_id, self.entity, object_id)
                 acl = [(Allow, self.user_id, perm.permission) for perm in permissions]
-                if app_conf('eor.debug-auth'):
+                if get_setting('eor.debug-auth'):
                     log.info('EntityFactory.__acl__(): acl %s' % acl)
                 return acl
             except Exception as e:
@@ -68,7 +68,7 @@ class EntityResource(object):
         """
         # [ (Allow, '<user_id>', 'view') ]
         # takes into account user's groups in a single database query
-        if app_conf('eor.debug-auth'):
+        if get_setting('eor.debug-auth'):
             print('>>>>>>> EntityFactory.__acl__: user_id =', self.user_id, 'object type =', self.entity, 'object id =', self.entity_id)
         return permissions_for_entity_from_database(self.user_id, self.entity, self.entity_id)
 
@@ -150,7 +150,7 @@ class ACLAuthorizationPolicy2(object):
         permits access, return an instance of
         :class:`pyramid.security.ACLDenied` if not."""
 
-        if app_conf('eor.debug-auth'):
+        if get_setting('eor.debug-auth'):
             log.info('permits: context %s, principals %s, permission %s' % (context, principals, permission))
 
         acl = '<No ACL found on any object in resource lineage>'

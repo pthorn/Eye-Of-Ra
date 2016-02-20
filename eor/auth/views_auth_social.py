@@ -25,7 +25,8 @@ from .utils import (login_validator, user_email_unique, user_login_unique,
                     user_can_login)
 
 from .. import models
-from ..utils import app_conf, add_flash_message
+from eor_settings import get_setting
+from ..render import add_flash_message  # TODO
 
 
 def handle_login_error(request, message_id, detail=None):

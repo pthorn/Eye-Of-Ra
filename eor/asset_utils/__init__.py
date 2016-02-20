@@ -6,9 +6,9 @@ from .webpack import webpack_asset
 def includeme(config):
     settings = config.get_settings()
 
-    from ..utils.settings import ParseSettings
+    from eor_settings import ParseSettings
 
-    (ParseSettings(settings, prefix='eor.')
+    (ParseSettings(settings, prefix='eor')
         .path('webpack-asset-path', default='../static/gen')
         .string('webpack-asset-defs', default='webpack-assets.json')
         .string('webpack-asset-url-prefix')

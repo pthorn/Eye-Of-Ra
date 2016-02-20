@@ -21,7 +21,6 @@ from .authentication import SessionUser, login_user, logout_user
 
 from .import settings
 from .. import models
-from ..utils import app_conf
 from ..render import add_flash_message
 from ..utils import send_auto_email, EmailException
 #from ..utils.template import render_auto_page

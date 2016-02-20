@@ -1,6 +1,5 @@
 # coding: utf-8
 
-from .settings import setting, app_conf
 from .send_email import send_email, send_auto_email, EmailException
 
 
@@ -18,8 +17,8 @@ def includeme(config):
     from .request_utils import get_ip
     config.add_request_method(get_ip, 'ip', reify=True)
 
-    from .settings import ParseSettings
+    from eor_settings import ParseSettings
 
-    (ParseSettings(config.get_settings(), prefix='eor.')
+    (ParseSettings(config.get_settings(), prefix='eor')
         .string('email-from', default='root@localhost')
         .string('smtp-host', default='localhost'))

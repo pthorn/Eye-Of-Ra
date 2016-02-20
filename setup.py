@@ -39,7 +39,9 @@ requires = [
     #'lxml == 2.3.5',
 
     'requests >= 2.3.0',
-    'rauth >= 0.7.0'
+    'rauth >= 0.7.0',
+
+    'eor-settings'
 ]
 
 setup(

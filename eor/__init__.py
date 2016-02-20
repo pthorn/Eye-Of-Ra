@@ -6,8 +6,6 @@ log = logging.getLogger(__name__)
 from pyramid.config import Configurator
 from pyramid.settings import asbool
 
-from .utils import app_conf
-
 
 def includeme(config):
     settings = config.get_settings()
@@ -16,9 +14,9 @@ def includeme(config):
 
     ## settings
 
-    from .utils.settings import ParseSettings
+    from eor_settings import ParseSettings
 
-    (ParseSettings(settings, prefix='eor.')
+    (ParseSettings(settings, prefix='eor')
         .string('mode', default='dev', variants=('dev', 'prod'))
         .string('domain')  # TODO in asset_utils?
         .string('static-domain')

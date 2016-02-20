@@ -8,7 +8,7 @@ from sqlalchemy.orm.exc import NoResultFound
 from mako.template import Template
 from mako.exceptions import MakoException
 
-from .settings import app_conf
+from eor_settings import get_setting
 
 
 import logging
@@ -20,17 +20,12 @@ class EmailException(Exception):
 
 
 def send_email(to, subject, body, html=False):
-
     msg = MIMEText(body, 'html' if html else 'plain', 'utf-8')
-    try:
-        msg['From'] = app_conf('eor.email-from')
-        msg['To'] = to
-        msg['Subject'] = subject
-        smtp_host = app_conf('eor.smtp-host')
-    except KeyError as e:
-        msg = 'ошибка в параметрах email: не указан параметр %s' % str(e)
-        log.error(msg)
-        raise EmailException(msg)
+
+    smtp_host = get_setting('eor.smtp-host')
+    msg['From'] = get_setting('eor.email-from')
+    msg['To'] = to
+    msg['Subject'] = subject
 
     try:
         s = smtplib.SMTP(smtp_host)

@@ -9,7 +9,6 @@ from pyramid.security import authenticated_userid, remember, forget
 
 from sqlalchemy.orm.exc import NoResultFound
 
-from ..utils import app_conf
 from . import settings
 
 
