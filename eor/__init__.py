@@ -39,7 +39,6 @@ def includeme(config):
     config.include('.error')
     config.include('.models')  # initialize sqlalchemy, connect to database
     config.include('.render')
-    config.include('.asset_utils')
     config.include('.auth')
 
     ## done

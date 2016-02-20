@@ -1,15 +1,18 @@
 # coding: utf-8
 
+from .webpack import webpack_asset
+
+
 def includeme(config):
-    from ..utils import app_conf
+    settings = config.get_settings()
 
-    # TODO
-    less_files = [
-        dict(source=['eor/admin/static/style/style.css'], dest='victoria/admin/static/style/style-compiled.css'),
-        dict(source=['eor/site/static/style/style.css'], dest='victoria/site/static/style/style-compiled.css')
-    ]
+    from ..utils.settings import ParseSettings
 
-    if app_conf('less') == 'static':
-        pass
-        #from .utils.less import compile_less
-        #compile_less(less_files)
+    (ParseSettings(settings, prefix='eor.')
+        .path('webpack-asset-path', default='../static/gen')
+        .string('webpack-asset-defs', default='webpack-assets.json')
+        .string('webpack-asset-url-prefix')
+        .bool('webpack-asset-autoreload', default=False))
+
+    from .webpack import load_definitions
+    load_definitions()

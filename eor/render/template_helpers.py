@@ -1,7 +1,9 @@
 # coding: utf-8
 
-from ..utils import app_conf
 import markupsafe
+
+from ..utils import app_conf
+from ..asset_utils import webpack_asset
 
 
 def static_domain():
