@@ -7,7 +7,7 @@ from ..asset_utils import webpack_asset
 
 
 def static_domain():
-    return app_conf('eor.static-domain')
+    return get_setting('eor.static-domain')
 
 
 def css_class(**kwargs):
@@ -21,7 +21,7 @@ def static_serial():
     .ini: app.static-serial = 1
     <script src="/site/js/site.js${h.static_serial() | n}"></script>
     """
-    serial = app_conf('eor.static-serial')
+    serial = get_setting('eor.static-serial')
     return u'?%s' % serial if serial else u''
 
 

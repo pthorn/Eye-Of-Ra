@@ -46,7 +46,7 @@ def load_definitions():
 
 
 def webpack_asset(bundle, kind='js', add_serial=False):
-    if app_conf('eor.webpack-asset-autoreload'):
+    if get_setting('eor.webpack-asset-autoreload'):
         load_definitions()
 
     res = get_setting('eor.webpack-asset-url-prefix') + _definitions[bundle][kind]
