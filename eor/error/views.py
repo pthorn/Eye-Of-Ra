@@ -6,8 +6,10 @@ log = logging.getLogger(__name__)
 # according to http://docs.pylonsproject.org/projects/pyramid/en/latest/api/exceptions.html ,
 # Forbidden = alias of HTTPForbidden, NotFound = alias of HTTPNotFound
 from pyramid.httpexceptions import HTTPFound, HTTPNotFound
+from pyramid.response import Response
 from pyramid.renderers import render_to_response
 
+from ..config import config
 from ..models import Session
 from ..render import render_message
 
@@ -27,25 +29,41 @@ def not_found(context, request):
 
 
 def not_found_xhr(context, request):
-    json = {'status': 'error', 'code': u'notfound'}
-    return render_to_response('json', json, request=request)
+    json = {
+        'status': 'http-error',
+        'http_status': 404,
+        'code': u'not-found'
+    }
+
+    return render_to_response('json', json, request=request,
+                              response=Response(status=404))
 
 
 def forbidden(context, request):
     log.debug(u'forbidden: path %s, result %s', request.path, request.exception.result)
 
-    if request.is_xhr:
-        if request.user:
-            json = {'status': 'error', 'code': u'forbidden'}
-        else:
-            json = {'status': 'error', 'code': u'unauthorized'}
-        return render_to_response('json', json, request=request)  # TODO status codes? this is 200 currently
+    if request.user:
+        return render_message('forbidden', subst=dict(), status=403, request=request)
     else:
-        if request.user:
-            return render_message('forbidden', subst=dict(), status=403, request=request)
+        if config.forbidden_show_login_handler is not None:
+            return config.forbidden_show_login_handler(context, request)
         else:
-            # show login view inplace with 401 instead?
             return HTTPFound(location=request.route_path('login', _query=(('rto', request.path),)))
+
+
+def forbidden_xhr(context, request):
+    log.debug(u'forbidden: path %s, result %s', request.path, request.exception.result)
+
+    http_status = 401 if request.user else 403
+
+    json = {
+        'status': 'http-error',
+        'http_status': http_status,
+        'code': u'forbidden' if request.user else 'unauthorized'
+    }
+
+    return render_to_response('json', json, request=request,
+                              response=Response(status=http_status))
 
 
 def url_decode_error(context, request):
