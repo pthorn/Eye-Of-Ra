@@ -11,6 +11,7 @@ from sqlalchemy.orm import scoped_session
 from sqlalchemy.orm import sessionmaker
 
 from zope.sqlalchemy import ZopeTransactionExtension
+import transaction
 
 from ..config import config
 
@@ -64,7 +65,9 @@ Session = scoped_session(sessionmaker(extension=ZopeTransactionExtension()))
 def initialize_sqlalchemy(settings):
 
     def pgsql_version():
-        return Session().connection().execute("select version()").fetchone()[0]
+        res = Session().connection().execute("select version()").fetchone()[0]
+        transaction.abort()
+        return res
 
     def psycopg2_version():
         import psycopg2
@@ -76,4 +79,4 @@ def initialize_sqlalchemy(settings):
 
     log.info('sqlalchemy version %s configured with url %s' % (sqlalchemy.__version__, settings['sqlalchemy.url'])) # TODO prints password into log!
     log.info('driver: psycopg2 %s' % psycopg2_version())
-    log.info('connected to database: %s' % pgsql_version())
+    log.info('connected to database: %s', pgsql_version())
